@@ -12,11 +12,24 @@ Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManage
 
 -  Tải lavarel: `composer global require laravel/installer`
 
+-  Tải package: `composer install`
+
+-  Chạy lệnh: `php --ini` để có đường dẫn file config của php
+
+-  Vào file config và thay đổi:
+
+```
+    variables_order = "GPCS"
+
+```
+
 -  Chạy dự án:
 
 ```
+
 cd src
-npm install && npm run build
+npm install
+npm run build
 composer run dev
 
 ```
