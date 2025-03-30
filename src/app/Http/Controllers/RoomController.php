@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Room;
+use App\Models\Player;
+
+use Symfony\Contracts\Service\Attribute\Required;
 
 class RoomController extends Controller
 {
@@ -12,42 +15,81 @@ class RoomController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'ownerId' => 'required|string|max:255',
-            'status' => 'required|string|in:waiting,on_going,ended'
+
         ]);
 
         $room = Room::create([
             'name' => $request->name,
-            'ownerId' => $request->ownerId,
-            'status' => $request->status,
+            'ownerId' => $request->ownerId, //hmmm
+            'status' => 'waiting'
         ]);
 
-        return response()->json(['message' => 'Đã tạo phòng!', 'room' => $room]);
+        $roomId = str_pad($room->id, 6, '0', STR_PAD_LEFT);
+
+        $room->update([
+            'roomId' => $roomId,
+        ]);
+
+        return response()->json(['roomId' => $room->roomId]);
     }
 
-    //cập nhật
-    public function updateRoom(Request $request, $id)
-    {
-        $room = Room::find($id);
 
+    //vào phòng
+    public function joinRoom($roomId, Request $request)
+    {
+        $playerId = $request->input('playerId');
+        $name = $request->input('name');
+
+        //check
+        $room = Room::find($roomId);
         if (!$room)
             return response()->json(['message' => 'Không thấy phòng'], 404);
 
-        $room->DB::update($request->all());
+        $existingPlayer = Player::where('roomId', $roomId)->where('id', $playerId)->first();
+        if ($existingPlayer)
+            return response()->json(['message' => 'Bạn đang trong phòng'], 400);
 
-        return response()->json(['message' => 'Đã cập nhật', 'room' => $room]);
+
+        $player = Player::create([
+            'name' => $name,
+            'roomId' => $roomId,
+            'score' => 0,
+        ]);
+        return response()->json(['name' => $room->name]);
     }
 
-    //xóa
-    public function deleteRoom($id)
+    //Lấy thông tin người chơi
+    public function getPlayers($roomId)
     {
-        $room = Room::find($id);
-
+        $room = Room::find($roomId);
         if (!$room)
-            return response()->json(['message' => 'Không thấy phòng'], 404);
+            return response()->json(['message' => 'Không có phòng'], 404);
 
-        $room->delete();
-
-        return response()->json(['message' => 'Đã xóa'], 200);
+        $players = Player::where('roomId', $roomId)->orderBy('score', 'asc')->get();
+        return response()->json($players);
     }
+
+
+    //Lấy quizz hiện tại
+
+    // Trả lời câu hỏi
+
+    // Bắt đầu trò chơi
+    public function startGame($roomId)
+    {
+        $room = Room::find($roomId);
+        if (!$room)
+            return response()->json(['message' => 'Không có phòng'], 404);
+
+        $room->status = 'on_going';
+        $room->save();
+
+        return response()->json(['message' => 'Doooo']);
+    }
+
+    // Lấy danh sách quizz
+
+    // Thêm quizz
+
+    // Xóa quizz khỏi phòng
 }

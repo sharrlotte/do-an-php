@@ -10,4 +10,8 @@ class Room extends Model
     use HasFactory;
     //
     protected $fillable = ['name', 'ownerId', 'status'];
+    public function players()
+    {
+        return $this->hasMany(Player::class);
+    }
 }
