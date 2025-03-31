@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api\V1;
+
+use App\Http\Controllers\Controller;
 
 use Illuminate\Http\Request;
 use App\Models\Room;
 use App\Models\Player;
-
-use Symfony\Contracts\Service\Attribute\Required;
+use Illuminate\Support\Facades\Auth;
 
 class RoomController extends Controller
 {
@@ -15,21 +16,33 @@ class RoomController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-
         ]);
 
+        // Lấy người dùng hiện tại đã đăng nhập
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['message' => 'Chưa đăng nhập'], 401);
+        }
+
+        // Lấy ID của người dùng để làm ownerId
+        $ownerId = $user->id;
+
+        // Tạo phòng
         $room = Room::create([
             'name' => $request->name,
-            'ownerId' => $request->ownerId, //hmmm
+            'ownerId' => $ownerId,
             'status' => 'waiting'
         ]);
 
+        // Đảm bảo roomId có 6 chữ số
         $roomId = str_pad($room->id, 6, '0', STR_PAD_LEFT);
 
+        // Cập nhật lại roomId
         $room->update([
             'roomId' => $roomId,
         ]);
 
+        // Trả về roomId đã được tạo
         return response()->json(['roomId' => $room->roomId]);
     }
 

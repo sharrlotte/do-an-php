@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\RoomController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -16,13 +15,3 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';
-
-Route::post('/rooms', [RoomController::class, 'createRoom']);
-Route::post('/rooms/{roomId}/join', [RoomController::class, 'joinRoom']);
-Route::get('/rooms/{roomId}/players', [RoomController::class, 'getPlayers']);
-Route::get('rooms/{id}/current-quizz', [RoomController::class, '']);
-Route::post('/rooms/{id}/answer', [RoomController::class, '']);
-Route::post(' /rooms/{roomId}/start', [RoomController::class, 'startGame']);
-Route::get('/rooms/{id}/quizz', [RoomController::class, '']);
-Route::post(' /rooms/{id}/quizz', [RoomController::class, '']);
-Route::delete('/rooms/{id}/quizz/{quizzId}', [RoomController::class, '']);

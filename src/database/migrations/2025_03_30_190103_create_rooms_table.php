@@ -21,7 +21,8 @@ return new class extends Migration
         Schema::create('rooms', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('ownerId');
+            $table->unsignedBigInteger('ownerId');
+            $table->foreign('ownerId')->references('id')->on('users')->onDelete('cascade');
             $table->enum('status', ['waiting', 'on_going', 'ended']); //set trạng thái phòng
             $table->timestamps();
         });
