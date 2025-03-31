@@ -7,6 +7,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Room;
 use App\Models\Player;
+use App\Models\Quizz;
+
 use Illuminate\Support\Facades\Auth;
 
 class RoomController extends Controller
@@ -84,7 +86,17 @@ class RoomController extends Controller
 
 
     //Lấy quizz hiện tại
+    public function getCurrentQuizz($roomId)
+    {
+        $room = Room::find($roomId);
+        if (!$room)  return response()->json(['message' => "Không có phòng"], 404);
 
+        $quizz = Quizz::where('roomId', $roomId)->latest()->first();
+        return response()->json([
+            'question' => $quizz->question,
+
+        ]);
+    }
     // Trả lời câu hỏi
 
     // Bắt đầu trò chơi
