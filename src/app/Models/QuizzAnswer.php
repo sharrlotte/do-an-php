@@ -9,7 +9,7 @@ class QuizzAnswer extends Model
     public $incrementing = false;
     protected $keyType = 'string';
 
-    protected $fillable = ['id', 'quizzId', 'content', 'isAnswer'];
+    protected $fillable = ['id', 'quizz_id', 'content', 'isAnswer'];
 
     protected $casts = [
         'isAnswer' => 'boolean',
