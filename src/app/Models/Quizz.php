@@ -7,12 +7,20 @@ use Illuminate\Database\Eloquent\Model;
 
 class Quizz extends Model
 {
+    public $incrementing = false;
+    protected $keyType = 'string';
 
-    use HasFactory;
-    //
-    protected $fillable = ['question', 'user_id'];
-    public function room()
+    protected $table = 'quizzes';
+
+    protected $fillable = ['id', 'question', 'user_id'];
+
+    public function answers()
     {
-        return $this->belongsTo(Room::class);
+        return $this->hasMany(QuizzAnswer::class, 'quizz_id', 'id');
+    }
+
+    public function rooms()
+    {
+        return $this->belongsToMany(Room::class, 'room_quizz', 'quizz_id', 'room_id');
     }
 }

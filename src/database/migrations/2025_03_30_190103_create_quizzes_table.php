@@ -12,10 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('quizzes', function (Blueprint $table) {
-            $table->id();
+            $table->string('id')->primary();
             $table->string('question');
-            $table->foreignId('id')->constrained('users');
-            $table->timestamps();
+
+            $table->unsignedBigInteger('user_id');          // user là số tự tăng
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 
