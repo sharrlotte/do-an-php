@@ -47,7 +47,8 @@ class RoomController extends Controller
     public function joinRoom($id, Request $request)
     {
         $room = Room::find($id);
-        if (!$room) return response()->json(['message' => 'Không thấy phòng'], 404);
+        if (!$room)
+            return response()->json(['message' => 'Không thấy phòng'], 404);
 
         $user = Auth::user();
         $playerId = $request->input('playerId');
@@ -122,20 +123,24 @@ class RoomController extends Controller
         ]);
 
         $room = Room::find($roomId);
-        if (!$room) return response()->json(['message' => 'Phòng không tồn tại'], 404);
+        if (!$room)
+            return response()->json(['message' => 'Phòng không tồn tại'], 404);
 
         $answer = \App\Models\QuizzAnswer::find($request->answerId);
-        if (!$answer) return response()->json(['message' => 'Không có câu trả lời'], 404);
+        if (!$answer)
+            return response()->json(['message' => 'Không có câu trả lời'], 404);
 
         $quizz = $answer->quizz;
-        if (!$quizz) return response()->json(['message' => 'Không tìm thấy câu hỏi'], 404);
+        if (!$quizz)
+            return response()->json(['message' => 'Không tìm thấy câu hỏi'], 404);
 
         $user = Auth::user();
         $player = $user
             ? Player::where('roomId', $roomId)->where('user_id', $user->id)->first()
             : Player::where('roomId', $roomId)->where('id', $request->playerId)->first();
 
-        if (!$player) return response()->json(['message' => 'Bạn chưa tham gia phòng này'], 403);
+        if (!$player)
+            return response()->json(['message' => 'Bạn chưa tham gia phòng này'], 403);
 
         $isCorrect = $answer->isAnswer;
 
@@ -224,5 +229,16 @@ class RoomController extends Controller
         $room->quizzes()->detach($quizzId);
 
         return response()->json(['message' => 'Đã xoá quiz khỏi phòng']);
+    }
+
+    public function getRoom()
+    {
+
+        $user = Auth::user();
+        $ownerId = $user?->id ?? 1;
+
+        $room = Room::where('ownerId', $ownerId)->get();
+
+        return response()->json($room)->header('content-type', 'application/json');
     }
 }

@@ -72,8 +72,15 @@ export interface Pagination<T> {
 export interface QuizAnswer {
     id: string;
     quiz_id: string;
-    isAnswer: string;
+    isAnswer: boolean;
     content: string;
     created_at: string;
     updated_at: string;
+}
+
+export interface Room {
+    id: string;
+    name: string;
+    ownerId: string;
+    status: 'waiting' | 'playing' | 'finished';
 }

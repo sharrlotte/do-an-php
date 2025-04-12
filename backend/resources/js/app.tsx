@@ -10,7 +10,9 @@ import { initializeTheme } from './hooks/use-appearance';
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 const queryClient = new QueryClient({
     defaultOptions: {
-        queries: {},
+        queries: {
+            retry: 1,
+        },
     },
 });
 

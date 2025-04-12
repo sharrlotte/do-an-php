@@ -48,7 +48,18 @@ class QuizzController extends Controller
         if (!$user)
             return response()->json(['message' => 'Bạn chưa đăng nhập'], 401);
 
+        if (isset($request->q)) {
+            $quizzes = Quizz::where('user_id', $user->id)
+                ->where('question', 'like', '%' . $request->q . '%')
+                ->orderBy('created_at', 'desc')
+                ->paginate($request->size);
+
+            return response()->json($quizzes)
+                ->header('Content-Type', 'application/json');
+        }
+
         $quizzes = Quizz::where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
             ->paginate($request->size);
 
         return response()->json($quizzes)

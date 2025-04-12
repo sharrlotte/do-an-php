@@ -10,11 +10,20 @@ const api = axios.create({
     },
 });
 
-api.interceptors.response.use((response) => {
-    if (response.status >= 400) {
-        throw new Error(response.data.message);
-    }
-    return response;
-});
+api.interceptors.response.use(
+    (response) => {
+        if (response.status >= 400) {
+            throw new Error(response.data.message);
+        }
+        return response;
+    },
+    (error) => {
+        if (error?.response?.data?.message) {
+            throw new Error(error.response.data.message);
+        }
+
+        return Promise.reject(error);
+    },
+);
 
 export { api };

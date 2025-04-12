@@ -12,6 +12,16 @@ use Illuminate\Support\Str;
 class QuizzAnswerController extends Controller
 {
     //tao answer
+    public function getQuizzAnswers(Request $request, $quizzId)
+    {
+        $quizz = Quizz::find($quizzId);
+        if (!$quizz) {
+            return response()->json(['message' => 'Không tìm thấy quiz'], 404);
+        }
+        $answers = QuizzAnswer::where('quizz_id', $quizzId)->get();
+        return response()->json($answers);
+    }
+
     public function createAnswer(Request $request, $quizzId)
     {
         $request->validate([

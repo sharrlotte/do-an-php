@@ -19,13 +19,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 
-const createQuizSchema = z.object({
-    question: z.string().min(1, 'Vui lòng nhập câu hỏi'),
+const createRoomSchema = z.object({
+    name: z.string().min(1, 'Vui lòng nhập tên phòng'),
 });
 
-type CreateQuizForm = z.infer<typeof createQuizSchema>;
+type CreateRoomForm = z.infer<typeof createRoomSchema>;
 
-export default function CreateQuizDialog() {
+export default function CreateRoomDialog() {
     const queryClient = useQueryClient();
 
     const {
@@ -33,45 +33,45 @@ export default function CreateQuizDialog() {
         handleSubmit,
         reset,
         formState: { errors },
-    } = useForm<CreateQuizForm>({
-        resolver: zodResolver(createQuizSchema),
+    } = useForm<CreateRoomForm>({
+        resolver: zodResolver(createRoomSchema),
     });
 
-    const createQuizMutation = useMutation({
-        mutationFn: async (data: CreateQuizForm) => {
-            const response = await axios.post('/api/v1/quizz', data);
+    const createRoomMutation = useMutation({
+        mutationFn: async (data: CreateRoomForm) => {
+            const response = await axios.post('/api/v1/rooms', data);
             return response.data;
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['quizzes'] });
-            toast.success('Tạo quiz thành công');
+            queryClient.invalidateQueries({ queryKey: ['rooms'] });
+            toast.success('Tạo phòng thành công');
             reset();
         },
-        onError: () => {
-            toast.error('Có lỗi xảy ra khi tạo quiz');
+        onError: (error) => {
+            toast.error('Có lỗi xảy ra khi tạo phòng: ' + error.message);
         },
     });
 
-    const onSubmit = (data: CreateQuizForm) => {
-        createQuizMutation.mutate(data);
+    const onSubmit = (data: CreateRoomForm) => {
+        createRoomMutation.mutate(data);
     };
 
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <Button>Tạo quiz mới</Button>
+                <Button>Tạo phòng mới</Button>
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Tạo quiz mới</DialogTitle>
-                    <DialogDescription>Tạo một quiz mới để chia sẻ với mọi người.</DialogDescription>
+                    <DialogTitle>Tạo phòng mới</DialogTitle>
+                    <DialogDescription>Tạo một phòng mới để chia sẻ với mọi người.</DialogDescription>
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                     <div className="space-y-2">
-                        <Label htmlFor="question">Câu hỏi</Label>
-                        <Input id="question" placeholder="Nhập câu hỏi của bạn" {...register('question')} />
-                        {errors.question && <p className="text-sm text-red-500">{errors.question.message}</p>}
+                        <Label htmlFor="name">Tên phòng</Label>
+                        <Input id="name" placeholder="Nhập tên phòng của bạn" {...register('name')} />
+                        {errors.name && <p className="text-sm text-red-500">{errors.name.message}</p>}
                     </div>
 
                     <DialogFooter>
@@ -82,8 +82,8 @@ export default function CreateQuizDialog() {
                         </DialogClose>
 
                         <DialogClose asChild>
-                            <Button type="submit" disabled={createQuizMutation.isPending}>
-                                {createQuizMutation.isPending ? 'Đang tạo...' : 'Tạo quiz'}
+                            <Button type="submit" disabled={createRoomMutation.isPending}>
+                                {createRoomMutation.isPending ? 'Đang tạo...' : 'Tạo phòng'}
                             </Button>
                         </DialogClose>
                     </DialogFooter>

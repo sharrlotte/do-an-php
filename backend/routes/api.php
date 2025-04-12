@@ -11,7 +11,8 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('v1')->group(function () {
 
     //Room API
-    Route::middleware('auth')->post('/rooms', [RoomController::class, 'createRoom']); //để quản lý quyền
+    Route::middleware('web')->post('/rooms', [RoomController::class, 'createRoom']); //để quản lý quyền
+    Route::middleware('web')->get('/rooms', [RoomController::class, 'getRoom']); //để quản lý quyền
     // Route::post('/rooms', [RoomController::class, 'createRoom']); //test postman
     Route::post('/rooms/{id}/join', [RoomController::class, 'joinRoom']); //done
     Route::get('/rooms/{roomId}/players', [RoomController::class, 'getPlayers']); //done
@@ -24,10 +25,6 @@ Route::prefix('v1')->group(function () {
 
     Route::post('/rooms/{roomId}/quizz', [RoomController::class, 'addQuizzToRoom']); //done
     Route::delete('/rooms/{roomId}/quizz/{quizzId}', [RoomController::class, 'removeQuizzFromRoom']);
-
-    Route::middleware('auth')->get('/@me', function (Request $request) {
-        return $request->user();
-    });
 });
 
 //Quiz API
@@ -42,7 +39,9 @@ Route::middleware(['web'])->prefix('v1')->group(function () {
 //QuizAnswer API
 Route::middleware('web')->prefix('v1')->group(function () {
     // Route::prefix('v1')->group(function () {//cmnt để test postman
+    Route::get('/quizz/{id}/answers', [QuizzAnswerController::class, 'getQuizzAnswers']);
     Route::post('/quizz/{id}/answers', [QuizzAnswerController::class, 'createAnswer']);
+    Route::post('/quizz/{id}/answers/${answerId}', [QuizzAnswerController::class, 'updateAnswer']);
     Route::patch('/answers/{id}', [QuizzAnswerController::class, 'updateAnswer']);
     Route::delete('/answers/{id}', [QuizzAnswerController::class, 'deleteAnswer']);
 });
