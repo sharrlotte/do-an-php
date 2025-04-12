@@ -12,11 +12,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('players', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('roomId')->constrained('rooms');
+            $table->string('id')->primary();
+            $table->string('roomId');
+            $table->unsignedBigInteger('user_id')->nullable(); // user có thể null (ẩn danh)
             $table->string('name');
             $table->integer('score')->default(0);
             $table->timestamps();
+
+            $table->foreign('roomId')->references('id')->on('rooms')->onDelete('cascade');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

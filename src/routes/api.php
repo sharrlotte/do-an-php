@@ -2,20 +2,44 @@
 // routes/api.php
 
 use App\Http\Controllers\Api\V1\RoomController;
+use App\Http\Controllers\Api\V1\QuizzController;
+use App\Http\Controllers\Api\V1\QuizzAnswerController;
+
 use Illuminate\Support\Facades\Route;
 // routes/api.php
 
-
 Route::prefix('v1')->group(function () {
 
-    Route::middleware('auth:sanctum')->post('/rooms', [RoomController::class, 'createRoom']);
+    //Room API
+    Route::middleware('auth')->post('/rooms', [RoomController::class, 'createRoom']); //để quản lý quyền
+    // Route::post('/rooms', [RoomController::class, 'createRoom']); //test postman
+    Route::post('/rooms/{id}/join', [RoomController::class, 'joinRoom']); //done
+    Route::get('/rooms/{roomId}/players', [RoomController::class, 'getPlayers']); //done
 
-    Route::post('/rooms/{roomId}/join', [RoomController::class, 'joinRoom']);
-    Route::get('/rooms/{roomId}/players', [RoomController::class, 'getPlayers']);
-    Route::get('/rooms/{roomId}/current-quizz', [RoomController::class, 'getCurrentQuizz']);
-    // Route::post('/rooms/{roomId}/answer', [RoomController::class, '']);
-    Route::post('/rooms/{roomId}/start', [RoomController::class, 'startGame']);
-    // Route::get('/rooms/{roomId}/quizz', [RoomController::class, '']);
-    // Route::post('/rooms/{roomId}/quizz', [RoomController::class, '']);
-    // Route::delete('/rooms/{roomId}/quizz/{quizzId}', [RoomController::class, '']);
+    Route::get('/rooms/{roomId}/quizz', [RoomController::class, 'getRoomQuizzes']); //done
+    Route::get('/rooms/{roomId}/current-quizz', [RoomController::class, 'getCurrentQuizz']); //done
+    Route::post('/rooms/{roomId}/answer', [RoomController::class, 'answerQuizz']); //done
+
+    Route::post('/rooms/{roomId}/start', [RoomController::class, 'startGame']); //done
+
+    Route::post('/rooms/{roomId}/quizz', [RoomController::class, 'addQuizzToRoom']); //done
+    Route::delete('/rooms/{roomId}/quizz/{quizzId}', [RoomController::class, 'removeQuizzFromRoom']);
+});
+
+//Quiz API
+Route::middleware('auth')->prefix('v1')->group(function () {
+    // Route::prefix('v1')->group(function () {//cmnt để test postman
+
+    Route::get('/quizz', [QuizzController::class, 'getMyQuizzes']); //done
+    Route::post('/quizz', [QuizzController::class, 'createQuizz']); //done
+    Route::patch('/quizz/{id}', [QuizzController::class, 'updateQuizz']);
+    Route::delete('/quizz/{id}', [QuizzController::class, 'deleteQuizz']);
+});
+
+//QuizAnswer API
+Route::middleware('auth')->prefix('v1')->group(function () {
+    // Route::prefix('v1')->group(function () {//cmnt để test postman
+    Route::post('/quizz/{id}/answers', [QuizzAnswerController::class, 'createAnswer']);
+    Route::patch('/answers/{id}', [QuizzAnswerController::class, 'updateAnswer']);
+    Route::delete('/answers/{id}', [QuizzAnswerController::class, 'deleteAnswer']);
 });
