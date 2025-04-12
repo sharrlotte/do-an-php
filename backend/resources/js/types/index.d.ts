@@ -31,7 +31,7 @@ export interface SharedData {
 }
 
 export interface User {
-    id: number;
+    id: string;
     name: string;
     email: string;
     avatar?: string;
@@ -39,4 +39,41 @@ export interface User {
     created_at: string;
     updated_at: string;
     [key: string]: unknown; // This allows for additional properties...
+}
+
+export interface Quizz {
+    id: string;
+    question: string;
+    user_id: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface Pagination<T> {
+    current_page: number;
+    data: T[];
+    first_page_url: string;
+    from: number | null;
+    last_page: number;
+    last_page_url: string;
+    links: {
+        url: string | null;
+        label: string;
+        active: boolean;
+    }[];
+    next_page_url: string | null;
+    path: string;
+    per_page: number;
+    prev_page_url: string | null;
+    to: number | null;
+    total: number;
+}
+
+export interface QuizAnswer {
+    id: string;
+    quiz_id: string;
+    isAnswer: string;
+    content: string;
+    created_at: string;
+    updated_at: string;
 }

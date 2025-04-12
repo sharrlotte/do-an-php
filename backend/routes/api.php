@@ -4,7 +4,7 @@
 use App\Http\Controllers\Api\V1\RoomController;
 use App\Http\Controllers\Api\V1\QuizzController;
 use App\Http\Controllers\Api\V1\QuizzAnswerController;
-
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 // routes/api.php
 
@@ -24,20 +24,23 @@ Route::prefix('v1')->group(function () {
 
     Route::post('/rooms/{roomId}/quizz', [RoomController::class, 'addQuizzToRoom']); //done
     Route::delete('/rooms/{roomId}/quizz/{quizzId}', [RoomController::class, 'removeQuizzFromRoom']);
+
+    Route::middleware('auth')->get('/@me', function (Request $request) {
+        return $request->user();
+    });
 });
 
 //Quiz API
-Route::middleware('auth')->prefix('v1')->group(function () {
-    // Route::prefix('v1')->group(function () {//cmnt để test postman
-
-    Route::get('/quizz', [QuizzController::class, 'getMyQuizzes']); //done
+Route::middleware(['web'])->prefix('v1')->group(function () {
+    // Public routes
+    Route::get('/quizz', [QuizzController::class, 'getMyQuizzes']);
     Route::post('/quizz', [QuizzController::class, 'createQuizz']); //done
     Route::patch('/quizz/{id}', [QuizzController::class, 'updateQuizz']);
     Route::delete('/quizz/{id}', [QuizzController::class, 'deleteQuizz']);
 });
 
 //QuizAnswer API
-Route::middleware('auth')->prefix('v1')->group(function () {
+Route::middleware('web')->prefix('v1')->group(function () {
     // Route::prefix('v1')->group(function () {//cmnt để test postman
     Route::post('/quizz/{id}/answers', [QuizzAnswerController::class, 'createAnswer']);
     Route::patch('/answers/{id}', [QuizzAnswerController::class, 'updateAnswer']);
