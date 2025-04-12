@@ -2,6 +2,7 @@ import { api } from '@/axios';
 import CreateRoomDialog from '@/components/create-room-dialog';
 import ErrorMessage from '@/components/error-message';
 import Loading from '@/components/loading';
+import RoomStatus from '@/components/room-status';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem, Room } from '@/types';
 import { Head, Link } from '@inertiajs/react';
@@ -58,15 +59,7 @@ function RoomCard({ room }: { room: Room }) {
         <Link className="flex rounded-lg border p-3" href={`/room/${room.id}`}>
             <div className="flex w-full justify-between">
                 <h2 className="text-lg font-semibold">{room.name}</h2>
-                <span className="text-sm">
-                    {room.status === 'playing' ? (
-                        <span className="text-green-400">Đang chơi</span>
-                    ) : room.status === 'finished' ? (
-                        <span className="text-blue-400">Đã chơi xong</span>
-                    ) : (
-                        <span className="text-yellow-300">Đang chờ bắt đầu</span>
-                    )}
-                </span>
+                <RoomStatus status={room.status} />
             </div>
         </Link>
     );

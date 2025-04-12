@@ -13,6 +13,7 @@ Route::prefix('v1')->group(function () {
     //Room API
     Route::middleware('web')->post('/rooms', [RoomController::class, 'createRoom']); //để quản lý quyền
     Route::middleware('web')->get('/rooms', [RoomController::class, 'getRoom']); //để quản lý quyền
+    Route::middleware('web')->get('/rooms/{id}', [RoomController::class, 'getRoomById']); //để quản lý quyền
     // Route::post('/rooms', [RoomController::class, 'createRoom']); //test postman
     Route::post('/rooms/{id}/join', [RoomController::class, 'joinRoom']); //done
     Route::get('/rooms/{roomId}/players', [RoomController::class, 'getPlayers']); //done

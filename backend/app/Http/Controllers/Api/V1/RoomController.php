@@ -42,6 +42,14 @@ class RoomController extends Controller
         ]);
     }
 
+    public function getRoomById($id)
+    {
+        $room = Room::where('id', $id)->first();
+        if (!$room)
+            return response()->json(['message' => 'Không thấy phòng'], 404);
+
+        return response()->json($room);
+    }
 
     //vào phòng
     public function joinRoom($id, Request $request)

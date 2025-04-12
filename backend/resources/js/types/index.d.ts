@@ -82,5 +82,12 @@ export interface Room {
     id: string;
     name: string;
     ownerId: string;
-    status: 'waiting' | 'playing' | 'finished';
+    status: 'waiting' | 'on_going' | 'finished';
+}
+
+export interface Player {
+    id: string;
+    user_id: string;
+    name: string;
+    score: number;
 }

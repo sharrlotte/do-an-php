@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useQuizAnswers } from '@/hooks/use-quiz-answers';
+import { cn } from '@/lib/utils';
 import { QuizAnswer, Quizz } from '@/types';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { debounce } from 'lodash';
@@ -14,11 +15,11 @@ import { Controller, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import CreateAnswerDialog from './create-answer-dialog';
 
-export default function QuizzCard({ quizz }: { quizz: Quizz }) {
+export default function QuizzCard({ className, quizz }: { className?: string; quizz: Quizz }) {
     return (
-        <div className="group bg-card relative flex h-full flex-col gap-3 rounded-xl border p-5 shadow-sm transition-all hover:shadow-md">
+        <div className={cn('group bg-card relative flex flex-col gap-3 rounded-xl border p-5 shadow-sm transition-all hover:shadow-md', className)}>
             <div className="flex items-start justify-between">
-                <h2 className="text-card-foreground text-lg leading-tight font-semibold">{quizz.question}</h2>
+                <h2 className="text-card-foreground text-xl leading-tight font-semibold">{quizz.question}</h2>
             </div>
             <QuizzAnswer quizzId={quizz.id} />
             <div className="mt-4">
@@ -28,7 +29,7 @@ export default function QuizzCard({ quizz }: { quizz: Quizz }) {
     );
 }
 
-function QuizzAnswer({ quizzId }: { quizzId: string }) {
+export function QuizzAnswer({ quizzId }: { quizzId: string }) {
     const { data: answers, isLoading, isError, error } = useQuizAnswers(quizzId);
 
     if (isError) {
@@ -50,7 +51,7 @@ function QuizzAnswer({ quizzId }: { quizzId: string }) {
     );
 }
 
-function AnswerCard({ quizzId, answer }: { quizzId: string; answer: QuizAnswer }) {
+export function AnswerCard({ quizzId, answer }: { quizzId: string; answer: QuizAnswer }) {
     const queryClient = useQueryClient();
     const { control, reset, watch, register, setValue } = useForm({
         defaultValues: {
@@ -107,7 +108,7 @@ function AnswerCard({ quizzId, answer }: { quizzId: string; answer: QuizAnswer }
                     name="content"
                     control={control}
                     render={({ field }) => (
-                        <Input type="text" {...field} className={`w-full border-none p-0 ${watch('isAnswer') ? 'text-green-300' : ''}`} />
+                        <Input type="text" {...field} className={`w-full border-none p-0 text-lg ${watch('isAnswer') ? 'text-green-300' : ''}`} />
                     )}
                 />
                 <div className="flex items-center space-x-2">

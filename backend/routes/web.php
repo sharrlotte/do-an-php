@@ -17,7 +17,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('room');
 
     Route::get('room/{id}', function ($id) {
-        return Inertia::render('room', [$id]);
+        return Inertia::render('room/id', ['id' => $id]);
     })->name('room');
 });
 
