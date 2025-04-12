@@ -12,7 +12,7 @@ class Quizz extends Model
 
     protected $table = 'quizzes';
 
-    protected $fillable = ['id', 'question', 'user_id'];
+    protected $fillable = ['id', 'question', 'user_id', 'created_at'];
 
     public function answers()
     {

@@ -9,7 +9,7 @@ class RoomQuizz extends Model
     public $incrementing = false;
     protected $keyType = 'string';
 
-    protected $fillable = ['id', 'quizz_id', 'room_id'];
+    protected $fillable = ['id', 'quizz_id', 'room_id', 'created_at'];
 
     public function quizz()
     {
