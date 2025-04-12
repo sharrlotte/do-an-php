@@ -131,9 +131,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <Button variant="ghost" size="icon">
                 <Bell size={20} />
               </Button>
+              <Link href="/profile">
               <Button variant="ghost" size="icon" className="rounded-full">
                 <User size={20} />
               </Button>
+              </Link>
             </div>
           </div>
         </header>
