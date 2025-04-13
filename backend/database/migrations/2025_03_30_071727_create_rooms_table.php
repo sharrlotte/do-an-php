@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -23,7 +22,7 @@ return new class extends Migration
             $table->string('name');
             $table->unsignedBigInteger('ownerId');
             $table->foreign('ownerId')->references('id')->on('users')->onDelete('cascade');
-            $table->enum('status', ['waiting', 'on_going', 'ended']); //set trạng thái phòng
+            $table->enum('status', ['waiting', 'on_going', 'ended', 'finished']); //set trạng thái phòng
             $table->timestamps();
         });
     }

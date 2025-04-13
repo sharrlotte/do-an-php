@@ -22,7 +22,18 @@ import { toast } from 'sonner';
 
 export default function Id({ id }: { id: string }) {
     return (
-        <AppLayout>
+        <AppLayout
+            breadcrumbs={[
+                {
+                    title: 'Phòng',
+                    href: '/room',
+                },
+                {
+                    title: id,
+                    href: `/room/${id}`,
+                },
+            ]}
+        >
             <RoomPage id={id} />
         </AppLayout>
     );
@@ -57,7 +68,19 @@ function RoomPage({ id }: { id: string }) {
                     <span>{data.name}</span>
                     <RoomStatus status={data.status} />
                 </h1>
-                <AddQuizToRoom roomId={data.id} />
+                <div className="ml-auto flex items-center gap-1">
+                    <Button
+                        variant="outline"
+                        onClick={() => {
+                            navigator.clipboard.writeText(data.id);
+                            toast.success('Đã sao chép mã phòng');
+                        }}
+                        className="ml-2"
+                    >
+                        Sao chép mã phòng
+                    </Button>
+                    <AddQuizToRoom roomId={data.id} />
+                </div>
             </div>
             <div className="h-full space-y-2 overflow-y-auto">
                 <section className="space-y-2 rounded-lg border p-4">
@@ -121,12 +144,14 @@ function PlayerList({ roomId }: { roomId: string }) {
         return <span className="text-muted-foreground m-auto">Chưa có người chơi tham gia</span>;
     }
 
-    return data.map((player) => (
-        <div className="bg-secondary rounded-lg border">
-            <span className="text-lg font-semibold">{player.name}</span>
-            <span className="text-muted-foreground">Điểm số: {player.score}</span>
-        </div>
-    ));
+    return data
+        .sort((a, b) => b.score - a.score)
+        .map((player) => (
+            <div className="bg-secondary flex justify-between rounded-lg border p-3">
+                <span className="text-lg font-semibold">{player.name}</span>
+                <span className="text-muted-foreground">Điểm số: {player.score}</span>
+            </div>
+        ));
 }
 
 function RoomQuizzList({ roomId }: { roomId: string }) {

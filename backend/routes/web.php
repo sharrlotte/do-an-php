@@ -19,6 +19,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('room/{id}', function ($id) {
         return Inertia::render('room/id', ['id' => $id]);
     })->name('room');
+    
+    Route::get('play', function () {
+        return Inertia::render('play');
+    })->name('play');
+    
+    Route::get('play/{id}', function ($id) {
+        return Inertia::render('play/id', ['id' => $id]);
+    })->name('play');
 });
 
 

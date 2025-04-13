@@ -82,7 +82,8 @@ export interface Room {
     id: string;
     name: string;
     ownerId: string;
-    status: 'waiting' | 'on_going' | 'finished';
+    status: 'waiting' | 'on_going' | 'ended';
+    next: string | null;
 }
 
 export interface Player {
@@ -90,4 +91,10 @@ export interface Player {
     user_id: string;
     name: string;
     score: number;
+}
+
+export interface CurrentQuizz {
+    id: string;
+    question: string;
+    answer: { id: string; content: string }[];
 }

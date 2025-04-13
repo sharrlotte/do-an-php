@@ -59,30 +59,24 @@ class RoomController extends Controller
             return response()->json(['message' => 'Không thấy phòng'], 404);
 
         $user = Auth::user();
-        $playerId = $request->input('playerId');
         $name = $request->input('name');
 
         $existsQuery = Player::where('roomId', $id);
-
-        if ($user) {
-            $existsQuery->where('user_id', $user->id);
-        } else {
-            $existsQuery->where('id', $playerId);
-        }
+        $existsQuery->where('user_id', $user->id);
 
         if ($existsQuery->exists()) {
             return response()->json(['message' => 'Bạn đã vào phòng rồi'], 400);
         }
 
         $player = Player::create([
-            'id' => $playerId ?? (string) Str::uuid(),
+            'id' => (string) Str::uuid(),
             'roomId' => $id,
-            'user_id' => $user?->id,
-            'name' => $name ?? ($user?->name ?? 'Ẩn danh'),
+            'user_id' => $user->id,
+            'name' => $name ?? ($user->name ?? 'Ẩn danh'),
             'score' => 0,
         ]);
 
-        return response()->json(['name' => $room->name]);
+        return response()->json(['name' => $room->name, 'player_id' => $player->id]);
     }
 
 
@@ -116,6 +110,7 @@ class RoomController extends Controller
         });
 
         return response()->json([
+            'id' => $room->currentQuizz->id,
             'question' => $question,
             'answer' => $answers
         ]);
@@ -172,27 +167,28 @@ class RoomController extends Controller
         if (!$room)
             return response()->json(['message' => 'Không có phòng'], 404);
 
+        $user = Auth::user();
+
+        if (!$user || $user->id !== $room->ownerId) {
+            return response()->json(['message' => 'Bạn không có quyền'], 403);
+        }
+
         if ($room->status === 'on_going') {
             return response()->json(['message' => 'Trò chơi đã bắt đầu'], 400);
         }
 
-        $quizz = $room->quizzes->random();
+        if ($room->quizzes->isEmpty()) {
+            return response()->json(['message' => 'Phòng chưa có câu hỏi'], 400);
+        }
 
+        $first_quizz = $room->quizzes()->orderBy('room_quizz.created_at')->first();
+        $room->current_quizz_id = $first_quizz->id;
+        $room->next = now("UTC")->addSeconds(20);
         $room->status = 'on_going';
-        $room->current_quizz_id = $quizz->id;
         $room->save();
 
         return response()->json([
             'message' => 'Bắt đầu thành công',
-            'first_quizz' => [
-                'question' => $quizz->question,
-                'answers' => $quizz->answers->map(function ($a) {
-                    return [
-                        'id' => $a->id,
-                        'content' => $a->content
-                    ];
-                })
-            ]
         ]);
     }
 
@@ -205,7 +201,7 @@ class RoomController extends Controller
             return response()->json(['message' => 'Không tìm thấy phòng'], 404);
         }
 
-        return response()->json($room->quizzes);
+        return response()->json($room->quizzes()->orderByDesc('room_quizz.created_at')->get());
     }
 
 
@@ -221,7 +217,9 @@ class RoomController extends Controller
             return response()->json(['message' => 'Không tìm thấy phòng'], 404);
         }
 
-        $room->quizzes()->syncWithoutDetaching([$request->quizzId]);
+
+
+        $room->quizzes()->attach($request->quizzId, ['created_at' => now()]);
 
         return response()->json(['message' => 'Đã thêm quiz vào phòng']);
     }
