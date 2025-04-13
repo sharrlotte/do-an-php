@@ -80,6 +80,8 @@ function RoomPage({ id }: { id: string }) {
             </div>
             {data.status === 'starting' ? (
                 <span className="m-auto animate-bounce text-3xl">Trò chơi sắp bắt đầu</span>
+            ) : data.status === 'ended' ? (
+                <RankResult roomId={data.id} />
             ) : (
                 <div className="h-full space-y-2 overflow-y-auto">
                     {data.status === 'on_going' && <CurrentQuizzCard room={data} />}
@@ -182,7 +184,7 @@ function AnswerList({ answers, roomId }: { roomId: string; answers: { id: string
         isSuccess,
         variables,
     } = useMutation({
-        mutationKey: ['room', roomId, 'answer'],
+        mutationKey: ['room', roomId, 'answer', answers],
         mutationFn: (answerId: string) => api.post(`/api/v1/rooms/${roomId}/answer`, { answerId }).then((res) => res.data as { bonus: number }),
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: ['room', roomId, 'player'] });
@@ -274,6 +276,98 @@ function PlayerList({ roomId }: { roomId: string }) {
                 </span>
             </motion.div>
         ));
+}
+
+function RankResult({ roomId }: { roomId: string }) {
+    const { data } = useQuery({
+        queryKey: ['room', roomId, 'player'],
+        queryFn: () => api.get(`/api/v1/rooms/${roomId}/players`).then((res) => res.data as Player[]),
+        refetchInterval: 1000,
+    });
+
+    if (!data) {
+        return null;
+    }
+
+    const sortedPlayers = data.sort((a, b) => b.score - a.score);
+    const [first, second, third, ...others] = sortedPlayers;
+
+    return (
+        <div className="flex h-full flex-col items-center gap-8">
+            <h1 className="text-4xl font-bold">Kết quả</h1>
+
+            <div className="flex items-end gap-4">
+                {second && (
+                    <motion.div
+                        initial={{ y: 50, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ delay: 0.2 }}
+                        className="flex flex-col items-center gap-2"
+                    >
+                        <div className="border-silver bg-secondary relative h-24 w-24 overflow-hidden rounded-full border-4">
+                            <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl">2</span>
+                        </div>
+                        <div className="flex flex-col items-center">
+                            <span className="font-semibold">{second.name}</span>
+                            <Counter to={second.score} />
+                        </div>
+                        <div className="h-32 w-24 rounded-t-lg bg-gray-200" />
+                    </motion.div>
+                )}
+
+                {first && (
+                    <motion.div initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="flex flex-col items-center gap-2">
+                        <div className="bg-secondary relative h-32 w-32 overflow-hidden rounded-full border-4 border-yellow-500">
+                            <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-3xl">👑</span>
+                        </div>
+                        <div className="flex flex-col items-center">
+                            <span className="text-xl font-bold">{first.name}</span>
+                            <Counter to={first.score} />
+                        </div>
+                        <div className="h-40 w-32 rounded-t-lg bg-yellow-500" />
+                    </motion.div>
+                )}
+
+                {third && (
+                    <motion.div
+                        initial={{ y: 50, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ delay: 0.4 }}
+                        className="flex flex-col items-center gap-2"
+                    >
+                        <div className="bg-secondary relative h-20 w-20 overflow-hidden rounded-full border-4 border-amber-700">
+                            <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-xl">3</span>
+                        </div>
+                        <div className="flex flex-col items-center">
+                            <span className="font-semibold">{third.name}</span>
+                            <Counter to={third.score} />
+                        </div>
+                        <div className="h-24 w-20 rounded-t-lg bg-amber-700" />
+                    </motion.div>
+                )}
+            </div>
+
+            {others.length > 0 && (
+                <div className="mt-8 w-full max-w-md space-y-2">
+                    {others.map((player, index) => (
+                        <motion.div
+                            initial={{ x: -50, opacity: 0 }}
+                            animate={{ x: 0, opacity: 1 }}
+                            transition={{ delay: 0.6 + index * 0.1 }}
+                            key={player.id}
+                            className="bg-secondary flex items-center justify-between rounded-lg border p-3"
+                        >
+                            <div className="flex items-center gap-3">
+                                <span className="text-muted-foreground">{index + 4}</span>
+                                <span className="font-semibold">{player.name}</span>
+                            </div>
+                            <Counter to={player.score} />
+                        </motion.div>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
 }
 
 import { animate, motion } from 'framer-motion';
