@@ -7,9 +7,10 @@ import AppLayout from '@/layouts/app-layout';
 import { cn } from '@/lib/utils';
 import { CurrentQuizz, Player, Quizz, Room, SharedData } from '@/types';
 import { usePage } from '@inertiajs/react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
+import { toast } from 'sonner';
 import { useInterval } from 'usehooks-ts';
 
 export default function Id({ id }: { id: string }) {
@@ -77,13 +78,17 @@ function RoomPage({ id }: { id: string }) {
                     <RoomStatus status={data.status} />
                 </h1>
             </div>
-            <div className="h-full space-y-2 overflow-y-auto">
-                {data.status === 'on_going' && <CurrentQuizzCard room={data} />}
-                <section className="space-y-2 rounded-lg border p-4">
-                    <h2 className="text-xl">Danh sách người chơi</h2>
-                    <PlayerList roomId={data.id} />
-                </section>
-            </div>
+            {data.status === 'starting' ? (
+                <span className="m-auto animate-bounce text-3xl">Trò chơi sắp bắt đầu</span>
+            ) : (
+                <div className="h-full space-y-2 overflow-y-auto">
+                    {data.status === 'on_going' && <CurrentQuizzCard room={data} />}
+                    <section className="space-y-2 rounded-lg border p-4">
+                        <h2 className="text-xl">Danh sách người chơi</h2>
+                        <PlayerList roomId={data.id} />
+                    </section>
+                </div>
+            )}
         </div>
     );
 }
@@ -91,6 +96,7 @@ function RoomPage({ id }: { id: string }) {
 function CurrentQuizzCard({ room }: { room: Room }) {
     const { auth } = usePage<SharedData>().props;
     const roomId = room.id;
+    const queryClient = useQueryClient();
 
     const { data, isLoading, isError, error } = useQuery({
         queryKey: ['room', roomId, 'current-quizz'],
@@ -98,12 +104,17 @@ function CurrentQuizzCard({ room }: { room: Room }) {
         refetchInterval: 1000,
     });
 
-    const [timeLeft, setTimeLeft] = useState(0);
+    const [timeLeft, setTimeLeft] = useState(20);
 
     useInterval(() => {
         if (room.next) {
             const timeLeft = (new Date(room.next + 'Z').getTime() - Date.now()) / 1000;
-            setTimeLeft(timeLeft > 0 ? timeLeft : 0);
+
+            setTimeLeft(Math.floor(timeLeft > 0 ? timeLeft : 0));
+
+            if (timeLeft <= 0) {
+                queryClient.invalidateQueries({ queryKey: ['room', roomId, 'player'] });
+            }
         }
     }, 100);
 
@@ -134,22 +145,58 @@ function CurrentQuizzCard({ room }: { room: Room }) {
                 {isError && <ErrorMessage message={error} />}
                 {data && (
                     <div className="flex w-full flex-col justify-between gap-6 rounded-lg border p-3">
-                        <div className="flex gap-2">
-                            <span>{timeLeft} giây</span>
+                        <div className="flex flex-col gap-2">
+                            <span
+                                className={cn('w-[200px] text-sm text-emerald-500', {
+                                    'text-red-500': timeLeft <= 5,
+                                    'text-yellow-500': timeLeft <= 10,
+                                })}
+                            >
+                                {timeLeft} giây
+                            </span>
                             <span className="text-lg font-semibold">{data?.question}</span>
                         </div>
-                        <section className="text-muted-foreground grid w-full grid-cols-2 gap-2">
-                            {data?.answer?.map((answer) => (
-                                <Button variant="outline" key={answer.id}>
-                                    {answer.content}
-                                </Button>
-                            ))}
-                        </section>
+                        <AnswerList roomId={room.id} answers={data.answer} />
                     </div>
                 )}
                 {auth.user.id === room.ownerId && <RoomQuizzList roomId={roomId} currentId={data?.id} />}
             </ErrorBoundary>
         </div>
+    );
+}
+
+function AnswerList({ answers, roomId }: { roomId: string; answers: { id: string; content: string }[] }) {
+    const queryClient = useQueryClient();
+    const {
+        mutate: submitAnswer,
+        isPending,
+        isSuccess,
+        variables,
+    } = useMutation({
+        mutationKey: ['room', roomId, 'answer'],
+        mutationFn: (answerId: string) => api.post(`/api/v1/rooms/${roomId}/answer`, { answerId }).then((res) => res.data as { bonus: number }),
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({ queryKey: ['room', roomId, 'player'] });
+            if (data.bonus > 0) toast.success(`Đáp án đúng, bạn được cộng thêm ${data.bonus} điểm`);
+        },
+    });
+
+    return (
+        <section className="text-muted-foreground grid w-full grid-cols-2 gap-2">
+            {answers.map((answer) => (
+                <Button
+                    className={cn({
+                        'bg-emerald-500 text-white': variables === answer.id,
+                    })}
+                    variant="outline"
+                    key={answer.id}
+                    disabled={isPending || isSuccess}
+                    onClick={() => submitAnswer(answer.id)}
+                >
+                    {answer.content}
+                </Button>
+            ))}
+        </section>
     );
 }
 
@@ -173,6 +220,10 @@ function RoomQuizzList({ roomId, currentId }: { currentId?: string; roomId: stri
 
     return (
         <section className="space-y-2 rounded-lg border p-3">
+            <div>
+                <h2 className="text-xl">Danh sách câu hỏi</h2>
+                <p className="text-muted-foreground text-sm">Chỉ chủ phòng có thể thấy</p>
+            </div>
             {data.map((quizz) => (
                 <div
                     key={quizz.id}
@@ -204,10 +255,12 @@ function PlayerList({ roomId }: { roomId: string }) {
         return <span className="text-muted-foreground m-auto">Chưa có người chơi tham gia</span>;
     }
 
-    return data.map((player) => (
-        <div key={player.id} className="bg-secondary flex justify-between rounded-lg border p-3">
-            <span className="text-lg font-semibold">{player.name}</span>
-            <span className="text-muted-foreground">Điểm số: {player.score}</span>
-        </div>
-    ));
+    return data
+        .sort((a, b) => b.score - a.score)
+        .map((player) => (
+            <div key={player.id} className="bg-secondary flex justify-between rounded-lg border p-3">
+                <span className="text-lg font-semibold">{player.name}</span>
+                <span className="text-muted-foreground">Điểm số: {player.score}</span>
+            </div>
+        ));
 }

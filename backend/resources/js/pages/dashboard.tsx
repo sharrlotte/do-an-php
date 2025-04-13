@@ -24,7 +24,7 @@ export default function Dashboard() {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Câu đố" />
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
-                <h1 className="text-xl font-semibold">Quizz của bạn</h1>
+                <h1 className="text-3xl font-semibold">Quizz của bạn</h1>
                 <div className="flex items-center justify-between gap-4">
                     <div className="flex flex-1 items-center gap-2">
                         <div className="relative max-w-md flex-1">

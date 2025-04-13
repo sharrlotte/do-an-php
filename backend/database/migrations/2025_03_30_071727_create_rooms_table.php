@@ -22,7 +22,7 @@ return new class extends Migration {
             $table->string('name');
             $table->unsignedBigInteger('ownerId');
             $table->foreign('ownerId')->references('id')->on('users')->onDelete('cascade');
-            $table->enum('status', ['waiting', 'on_going', 'ended', 'finished']); //set trạng thái phòng
+            $table->enum('status', ['waiting', 'on_going', 'ended']); //set trạng thái phòng
             $table->timestamps();
         });
     }

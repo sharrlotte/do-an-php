@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use Carbon\Carbon;
 use Illuminate\Support\Str;
 use App\Http\Controllers\Controller;
 
@@ -65,7 +66,10 @@ class RoomController extends Controller
         $existsQuery->where('user_id', $user->id);
 
         if ($existsQuery->exists()) {
-            return response()->json(['message' => 'Bạn đã vào phòng rồi'], 400);
+            PLayer::where('user_id', $user->id)->update([
+                'name' => $name ?? ($user->name ?? 'Ẩn danh'),
+            ]);
+            return response()->json(['name' => $room->name, 'player_id' => $existsQuery->get()->first()->id]);
         }
 
         $player = Player::create([
@@ -122,7 +126,6 @@ class RoomController extends Controller
     {
         $request->validate([
             'answerId' => 'required|string',
-            'playerId' => 'required|string',
         ]);
 
         $room = Room::find($roomId);
@@ -138,23 +141,25 @@ class RoomController extends Controller
             return response()->json(['message' => 'Không tìm thấy câu hỏi'], 404);
 
         $user = Auth::user();
-        $player = $user
-            ? Player::where('roomId', $roomId)->where('user_id', $user->id)->first()
-            : Player::where('roomId', $roomId)->where('id', $request->playerId)->first();
+        $player = Player::where('roomId', $roomId)->where('user_id', $user->id)->first();
 
         if (!$player)
             return response()->json(['message' => 'Bạn chưa tham gia phòng này'], 403);
 
         $isCorrect = $answer->isAnswer;
 
+        $timeLeft = now("UTC")->diffInMilliseconds(Carbon::parse($room->next, "UTC"));
+        $bonus = $isCorrect ? 100 + max(floor($timeLeft / 100), 0) : 0;
+
         if ($isCorrect) {
-            $player->score += 10;
+            $player->score += $bonus;
             $player->save();
         }
 
         return response()->json([
             'correct' => $isCorrect,
             'new_score' => $player->score,
+            'bonus' => $bonus
         ]);
     }
 
@@ -184,8 +189,10 @@ class RoomController extends Controller
         $first_quizz = $room->quizzes()->orderBy('room_quizz.created_at')->first();
         $room->current_quizz_id = $first_quizz->id;
         $room->next = now("UTC")->addSeconds(20);
-        $room->status = 'on_going';
+        $room->status = 'starting';
         $room->save();
+
+        Player::where('roomId', $room->id)->update(['score' => 0]);
 
         return response()->json([
             'message' => 'Bắt đầu thành công',

@@ -13,7 +13,7 @@ Artisan::command('inspire', function () {
 
 // Artisan::command("update", function () {
 Schedule::call(function () {
-    $rooms = Room::where('status', 'on_going')->get();
+    $rooms = Room::where('status', 'on_going')->orWhere('status', 'starting')->get();
     $rooms->each(function ($room) {
 
         if ($room->current_quizz_id == null) {
@@ -26,6 +26,13 @@ Schedule::call(function () {
 
 
         if ($room->next && $room->next > Carbon::now()) {
+            return;
+        }
+
+        if ($room->status == 'starting') {
+            $room->status = 'on_going';
+            $room->next = now("UTC")->addSeconds(20);
+            $room->save();
             return;
         }
 

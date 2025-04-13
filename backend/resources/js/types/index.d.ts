@@ -82,7 +82,7 @@ export interface Room {
     id: string;
     name: string;
     ownerId: string;
-    status: 'waiting' | 'on_going' | 'ended';
+    status: 'waiting' | 'on_going' | 'ended' | 'starting';
     next: string | null;
 }
 
