@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 import { CurrentQuizz, Player, Quizz, Room, SharedData } from '@/types';
 import { usePage } from '@inertiajs/react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { toast } from 'sonner';
 import { useInterval } from 'usehooks-ts';
@@ -84,7 +84,10 @@ function RoomPage({ id }: { id: string }) {
                 <div className="h-full space-y-2 overflow-y-auto">
                     {data.status === 'on_going' && <CurrentQuizzCard room={data} />}
                     <section className="space-y-2 rounded-lg border p-4">
-                        <h2 className="text-xl">Danh sách người chơi</h2>
+                        <div className="flex w-full justify-between text-sm">
+                            <h2 className="text-xl">Danh sách người chơi</h2>
+                            <span>Điểm số</span>
+                        </div>
                         <PlayerList roomId={data.id} />
                     </section>
                 </div>
@@ -258,9 +261,35 @@ function PlayerList({ roomId }: { roomId: string }) {
     return data
         .sort((a, b) => b.score - a.score)
         .map((player) => (
-            <div key={player.id} className="bg-secondary flex justify-between rounded-lg border p-3">
+            <motion.div layout id={player.id} key={player.id} className="bg-secondary flex justify-between rounded-lg border p-3">
                 <span className="text-lg font-semibold">{player.name}</span>
-                <span className="text-muted-foreground">Điểm số: {player.score}</span>
-            </div>
+                <span className="text-muted-foreground">
+                    <Counter to={player.score} />
+                </span>
+            </motion.div>
         ));
+}
+
+import { animate, motion } from 'framer-motion';
+
+function Counter({ to }: { to: number }) {
+    const nodeRef = useRef<HTMLParagraphElement>(null);
+    const prevValue = useRef(0);
+
+    useEffect(() => {
+        const node = nodeRef.current;
+        const from = prevValue.current;
+
+        const controls = animate(from, to, {
+            duration: 0.3,
+            onUpdate(value) {
+                if (node) node.textContent = value.toFixed(0);
+            },
+        });
+
+        prevValue.current = to;
+        return () => controls.stop();
+    }, [to]);
+
+    return <p ref={nodeRef} />;
 }
