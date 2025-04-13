@@ -107,6 +107,26 @@ function CurrentQuizzCard({ room }: { room: Room }) {
         }
     }, 100);
 
+    if (data && 'done' in data) {
+        return (
+            <div className="flex w-full flex-col justify-between gap-6 rounded-lg border p-3">
+                <div className="flex items-center gap-2">
+                    <span>Đã kết thúc</span>
+                </div>
+            </div>
+        );
+    }
+
+    if (timeLeft <= 0) {
+        return (
+            <div className="flex w-full flex-col justify-between gap-6 rounded-lg border p-3">
+                <div className="flex items-center gap-2">
+                    <span>Đã hết thời gian, chờ câu hỏi tiếp theo</span>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="space-y-2">
             <ErrorBoundary FallbackComponent={ErrorFallback}>

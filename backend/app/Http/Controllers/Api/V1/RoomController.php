@@ -98,7 +98,7 @@ class RoomController extends Controller
         $room = Room::with('currentQuizz.answers')->find($roomId);
 
         if (!$room || !$room->currentQuizz) {
-            return response()->json(['message' => 'Không có câu hỏi hiện tại'], 404);
+            return response()->json(['done' => true], 200);
         }
 
         $question = $room->currentQuizz->question;

@@ -93,8 +93,12 @@ export interface Player {
     score: number;
 }
 
-export interface CurrentQuizz {
-    id: string;
-    question: string;
-    answer: { id: string; content: string }[];
-}
+export type CurrentQuizz =
+    | {
+          id: string;
+          question: string;
+          answer: { id: string; content: string }[];
+      }
+    | {
+          done: true;
+      };
