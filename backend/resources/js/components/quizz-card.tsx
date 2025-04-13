@@ -1,4 +1,5 @@
 import { api } from '@/axios';
+import DeleteQuizDialog from '@/components/delete-quiz-dialog';
 import ErrorMessage from '@/components/error-message';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -18,8 +19,9 @@ import CreateAnswerDialog from './create-answer-dialog';
 export default function QuizzCard({ className, quizz }: { className?: string; quizz: Quizz }) {
     return (
         <div className={cn('group bg-card relative flex flex-col gap-3 rounded-xl border p-5 shadow-sm transition-all hover:shadow-md', className)}>
-            <div className="flex items-start justify-between">
+            <div className="flex items-start justify-between gap-4">
                 <h2 className="text-card-foreground text-xl leading-tight font-semibold">{quizz.question}</h2>
+                <DeleteQuizDialog quizzId={quizz.id} />
             </div>
             <QuizzAnswer quizzId={quizz.id} />
             <div className="mt-4">
