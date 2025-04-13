@@ -131,23 +131,29 @@ function CurrentQuizzCard({ room }: { room: Room }) {
         );
     }
 
-    if (timeLeft <= 0) {
-        return (
-            <div className="flex w-full flex-col justify-between gap-6 rounded-lg border p-3">
-                <div className="flex items-center gap-2">
-                    <span>Đã hết thời gian, chờ câu hỏi tiếp theo</span>
-                </div>
-            </div>
-        );
-    }
-
     return (
         <div className="space-y-2">
             <ErrorBoundary FallbackComponent={ErrorFallback}>
                 {isLoading && <Loading />}
                 {isError && <ErrorMessage message={error} />}
                 {data && (
-                    <div className="flex w-full flex-col justify-between gap-6 rounded-lg border p-3">
+                    <motion.div
+                        layout
+                        exit={{
+                            x: '-100%',
+                        }}
+                        className="relative flex w-full flex-col justify-between gap-6 rounded-lg border p-3"
+                    >
+                        <div
+                            className={cn(
+                                'pointer-events-none absolute inset-0 z-50 hidden h-full items-center justify-center rounded-lg bg-white/20 text-center backdrop-blur-sm backdrop-brightness-90',
+                                {
+                                    flex: timeLeft <= 0,
+                                },
+                            )}
+                        >
+                            Đã hết thời gian, chờ câu hỏi tiếp theo
+                        </div>
                         <div className="flex flex-col gap-2">
                             <span
                                 className={cn('w-[200px] text-sm text-emerald-500', {
@@ -160,7 +166,7 @@ function CurrentQuizzCard({ room }: { room: Room }) {
                             <span className="text-lg font-semibold">{data?.question}</span>
                         </div>
                         <AnswerList roomId={room.id} answers={data.answer} />
-                    </div>
+                    </motion.div>
                 )}
                 {auth.user.id === room.ownerId && <RoomQuizzList roomId={roomId} currentId={data?.id} />}
             </ErrorBoundary>

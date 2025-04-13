@@ -140,6 +140,9 @@ class RoomController extends Controller
         if (!$quizz)
             return response()->json(['message' => 'Không tìm thấy câu hỏi'], 404);
 
+        if ($quizz->id !== $room->current_quizz_id)
+            return response()->json(['message' => 'Câu hỏi không khớp'], 400);
+
         $user = Auth::user();
         $player = Player::where('roomId', $roomId)->where('user_id', $user->id)->first();
 
