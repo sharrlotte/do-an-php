@@ -119,6 +119,7 @@ function CurrentQuizzCard({ room }: { room: Room }) {
 
             if (timeLeft <= 0) {
                 queryClient.invalidateQueries({ queryKey: ['room', roomId, 'player'] });
+                queryClient.invalidateQueries({ queryKey: ['room', roomId, 'current-quizz'] });
             }
         }
     }, 100);
